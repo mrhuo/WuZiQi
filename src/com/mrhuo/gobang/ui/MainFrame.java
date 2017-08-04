@@ -5,6 +5,7 @@
 package com.mrhuo.gobang.ui;
 
 import com.mrhuo.gobang.bean.User;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -36,7 +37,7 @@ public class MainFrame extends JFrame {
     /**
      * 初始化界面
      */
-    private void init(){
+    private void init() {
         this.setSize(600, 600);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -48,12 +49,13 @@ public class MainFrame extends JFrame {
         this.addEventListener();
 
         this.setVisible(true);
+        this.setUser(null);
     }
 
     /**
      * 增加事件
      */
-    private void addEventListener(){
+    private void addEventListener() {
         this.loginMenu.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -61,10 +63,8 @@ public class MainFrame extends JFrame {
                     LoginFrame loginFrame = new LoginFrame(MainFrame.this, true);
                     loginFrame.setVisible(true);
                     setUser(loginFrame.getLoginedUser());
-                    loginMenu.setText("退出");
                 } else {
                     setUser(null);
-                    loginMenu.setText("登录");
                 }
             }
         });
@@ -73,7 +73,7 @@ public class MainFrame extends JFrame {
     /**
      * 构造菜单条
      */
-    private void buildMenuBar(){
+    private void buildMenuBar() {
         this.menuBar = new JMenuBar();
         this.systemFunction = new JMenu("系统功能");
         this.loginMenu = new JMenuItem("登录");
@@ -88,15 +88,12 @@ public class MainFrame extends JFrame {
         //  |---人执白
         this.peopleWithRobotFight.add(this.peopleHoldBlack);
         this.peopleWithRobotFight.add(this.peopleHoldWhite);
-        this.peopleWithRobotFight.setVisible(false);
 
         //系统功能下有两个子菜单：
         //  系统功能：
         //  |---登录
         //  |---人人对弈
         //  |---人机对弈
-        this.peopleWithPeopleFight.setVisible(false);
-        this.peopleWithRobotFight.setVisible(false);
         this.systemFunction.add(this.peopleWithPeopleFight);
         this.systemFunction.add(this.peopleWithRobotFight);
         this.systemFunction.add(this.loginMenu);
@@ -114,7 +111,7 @@ public class MainFrame extends JFrame {
     /**
      * 构造主界面内容
      */
-    private void buildMainContent(){
+    private void buildMainContent() {
         this.chessBoard = new ChessBoard();
         this.gameInfo = new GameInfo();
 
@@ -124,6 +121,7 @@ public class MainFrame extends JFrame {
 
     /**
      * 获取当前用户
+     *
      * @return
      */
     public User getUser() {
@@ -132,14 +130,22 @@ public class MainFrame extends JFrame {
 
     /**
      * 设置当前用户
+     *
      * @param user
      */
     public void setUser(User user) {
         this.user = user;
-        if (this.user == null) {
+        boolean isLogin = this.user != null;
+        this.peopleWithRobotFight.setVisible(isLogin);
+        this.peopleWithPeopleFight.setVisible(isLogin);
+        this.peopleWithRobotFight.setVisible(isLogin);
+
+        if (!isLogin) {
             this.gameInfo.updateUserInfo("未登录");
+            this.loginMenu.setText("登录");
             return;
         }
         this.gameInfo.updateUserInfo("欢迎您，" + this.user.getName());
+        this.loginMenu.setText("退出");
     }
 }

@@ -4,8 +4,12 @@
 
 package com.mrhuo.gobang.ui;
 
+import com.mrhuo.gobang.bean.CONSTANT;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  * 棋盘
@@ -18,11 +22,22 @@ public class ChessBoard extends JPanel {
 
     public ChessBoard() {
         this.setSize(500, 500);
-        this.setBackground(new Color(240, 240, 190));
+        this.setBackground(CONSTANT.defaultChessBoradColor);
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (isAvaliableArea(e.getPoint())) {
+                    Point point = transformPoint(e.getPoint());
+                    JOptionPane.showMessageDialog(null, point);
+                }
+                super.mouseClicked(e);
+            }
+        });
     }
 
     /**
      * 重写 paint 方法
+     *
      * @param g
      */
     @Override
@@ -34,6 +49,7 @@ public class ChessBoard extends JPanel {
 
     /**
      * 画棋盘
+     *
      * @param g2
      */
     private void paintGrid(Graphics g2) {
@@ -72,8 +88,43 @@ public class ChessBoard extends JPanel {
 
     /**
      * 画棋子
+     *
      * @param g
      */
     private void paintChessMan(Graphics g) {
+        Image image = CONSTANT.getImage("black");
+        g.drawImage(image, 0, 0, 20, 20, null);
+    }
+
+    /**
+     * 点击区域是否有效
+     *
+     * @param point
+     * @return
+     */
+    private boolean isAvaliableArea(Point point) {
+        double x = point.getX();
+        double y = point.getY();
+        int maxSize = 15 * gridSize;
+
+        if (x >= offsetSizeX - 10 &&
+                x <= maxSize + offsetSizeX - 10 &&
+                y >= offsetSizeY - 10 &&
+                y <= maxSize + offsetSizeY - 10) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 将屏幕坐标转化为棋盘坐标
+     *
+     * @param point
+     * @return
+     */
+    private Point transformPoint(Point point) {
+        int x = (int) Math.round((point.getX() - offsetSizeX) / gridSize * 1.0);
+        int y = (int) Math.round((point.getY() - offsetSizeY) / gridSize * 1.0);
+        return new Point(x, y);
     }
 }

@@ -3,7 +3,6 @@
  */
 package com.mrhuo.gobang;
 
-import com.mrhuo.gobang.ui.LoginFrame;
 import com.mrhuo.gobang.ui.MainFrame;
 
 public class App {

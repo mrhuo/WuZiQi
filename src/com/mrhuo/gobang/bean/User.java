@@ -3,6 +3,7 @@
  */
 
 package com.mrhuo.gobang.bean;
+
 /**
  * 用户类
  */
@@ -36,7 +37,7 @@ public class User {
         this.score += score;
     }
 
-    public void resetScore(){
+    public void resetScore() {
         this.score = 0;
     }
 
