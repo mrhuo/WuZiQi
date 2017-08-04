@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="WuZiQi:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/WuZiQi_jar</output-path>
+    <root id="archive" name="WuZiQi.jar">
+      <element id="module-output" name="WuZiQi" />
+    </root>
+  </artifact>
+</component>
