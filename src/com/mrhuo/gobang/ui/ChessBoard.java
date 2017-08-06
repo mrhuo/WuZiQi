@@ -4,33 +4,54 @@
 
 package com.mrhuo.gobang.ui;
 
-import com.mrhuo.gobang.bean.CONSTANT;
+import com.mrhuo.gobang.bean.GameAction;
+import com.mrhuo.gobang.bean.GameData;
+import com.mrhuo.gobang.common.CONSTANT;
+import com.mrhuo.gobang.bean.ChessColor;
+import com.mrhuo.gobang.bean.ChessPoint;
+import com.mrhuo.gobang.events.DropChessListener;
+import com.mrhuo.gobang.events.OnReceiveServerActionListener;
+import com.mrhuo.gobang.logic.GameLogic;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import java.net.Socket;
+
+import static com.mrhuo.gobang.common.CONSTANT.*;
 
 /**
  * 棋盘
  */
-public class ChessBoard extends JPanel {
+public class ChessBoard extends JPanel implements DropChessListener, OnReceiveServerActionListener {
 
-    private final int gridSize = 30;
-    private final int offsetSizeX = 90;
-    private final int offsetSizeY = 40;
-
-    public ChessBoard() {
+    private GameInfo gameInfo;
+    public ChessBoard(GameInfo gameInfo) {
+        this.gameInfo = gameInfo;
         this.setSize(500, 500);
         this.setBackground(CONSTANT.defaultChessBoradColor);
+        GameLogic.getInstance().setDropChessListener(this);
+        GameLogic.getInstance().setOnReceiveServerActionListener(this);
+
+        this.addMouseMotionListener(new MouseMotionListener() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                GameLogic.getInstance().moveOnBoard(e.getPoint(), getGraphics());
+                repaint();
+            }
+        });
+
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (isAvaliableArea(e.getPoint())) {
-                    Point point = transformPoint(e.getPoint());
-                    JOptionPane.showMessageDialog(null, point);
-                }
-                super.mouseClicked(e);
+                GameLogic.getInstance().dropChess(e.getPoint());
+                repaint();
             }
         });
     }
@@ -92,39 +113,39 @@ public class ChessBoard extends JPanel {
      * @param g
      */
     private void paintChessMan(Graphics g) {
-        Image image = CONSTANT.getImage("black");
-        g.drawImage(image, 0, 0, 20, 20, null);
-    }
-
-    /**
-     * 点击区域是否有效
-     *
-     * @param point
-     * @return
-     */
-    private boolean isAvaliableArea(Point point) {
-        double x = point.getX();
-        double y = point.getY();
-        int maxSize = 15 * gridSize;
-
-        if (x >= offsetSizeX - 10 &&
-                x <= maxSize + offsetSizeX - 10 &&
-                y >= offsetSizeY - 10 &&
-                y <= maxSize + offsetSizeY - 10) {
-            return true;
+        ChessColor[][] currentChess = GameLogic.getInstance().getChess();
+        Image image;
+        for (int i = 0; i < 15; i++) {
+            for (int j = 0; j < 15; j++) {
+                ChessColor color = currentChess[i][j];
+                Point point = ChessPoint.transformToClientPoint(i, j);
+                if (color != null) {
+                    image = CONSTANT.getImage(color == ChessColor.BLACK ? "black" : "white");
+                    g.drawImage(image,
+                            (int) point.getX(),
+                            (int) point.getY(),
+                            20, 20, null);
+                }
+            }
         }
-        return false;
     }
 
-    /**
-     * 将屏幕坐标转化为棋盘坐标
-     *
-     * @param point
-     * @return
-     */
-    private Point transformPoint(Point point) {
-        int x = (int) Math.round((point.getX() - offsetSizeX) / gridSize * 1.0);
-        int y = (int) Math.round((point.getY() - offsetSizeY) / gridSize * 1.0);
-        return new Point(x, y);
+    @Override
+    public void onDropChess(int x, int y, ChessColor color) {
+        this.gameInfo.updateGameStatus("轮到" +
+                GameLogic.getInstance().getCurrentChessColor().getChessColorCNName() +
+                "方下棋"
+        );
+        repaint();
+    }
+
+    @Override
+    public void onReceiveServerAction(Socket clientSocket, GameAction gameAction, GameData gameData) {
+        System.out.println(GameLogic.getInstance().getCurrentChessColor());
+        this.gameInfo.updateGameStatus("轮到" +
+                GameLogic.getInstance().getCurrentChessColor().getChessColorCNName() +
+                "方下棋"
+        );
+        repaint();
     }
 }

@@ -2,12 +2,14 @@
  * Copyright  (c) mrhuo.com 2017.
  */
 
-package com.mrhuo.gobang.bean;
+package com.mrhuo.gobang.common;
+
+import com.mrhuo.gobang.bean.GameData;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.Socket;
 import java.util.Random;
 
 /**
@@ -15,6 +17,11 @@ import java.util.Random;
  */
 public final class CONSTANT {
     public static final Color defaultChessBoradColor = new Color(236, 207, 105);
+    public static final int gridSize = 30;
+    public static final int offsetSizeX = 90;
+    public static final int offsetSizeY = 40;
+    public static final int serverPort = 9988;
+    public static final String serverAddress = "127.0.0.1";
     /**
      * 姓
      */
@@ -72,16 +79,76 @@ public final class CONSTANT {
      * @return
      */
     public static Image getImage(String imageName) {
+        ImageIcon imageIcon = getImageIcon(imageName);
+        if (imageIcon != null) {
+            return imageIcon.getImage();
+        }
+        return null;
+    }
+
+    /**
+     * 获取资源图片 ImageIcon
+     *
+     * @param imageName
+     * @return
+     */
+    public static ImageIcon getImageIcon(String imageName) {
         InputStream inputStream = CONSTANT.class.getClassLoader().getResourceAsStream(imageName + ".png");
         try {
             byte[] bytes = new byte[inputStream.available()];
             inputStream.read(bytes);
             inputStream.close();
-            return new ImageIcon(bytes).getImage();
+            return new ImageIcon(bytes);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
     }
-}
 
+    /**
+     * 向服务器 OutputStream 中写入数据
+     *
+     * @param outputStream
+     * @param gameData
+     * @throws Exception
+     */
+    public static void sendData(OutputStream outputStream, GameData gameData) throws Exception {
+        synchronized (outputStream){
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+            objectOutputStream.writeObject(gameData);
+            objectOutputStream.flush();
+        }
+    }
+
+    /**
+     * 从服务器的流中读取数据
+     *
+     * @param inputStream
+     * @return
+     * @throws Exception
+     */
+    public static GameData receiveData(InputStream inputStream) throws Exception {
+        synchronized (inputStream) {
+            ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+            return (GameData) objectInputStream.readObject();
+        }
+    }
+
+    /**
+     * 给用户弹出信息
+     *
+     * @param msg
+     */
+    public static void alertUser(String msg) {
+        JOptionPane.showMessageDialog(null, msg);
+    }
+
+    /**
+     * 判断SOCKET是否已经连接，可用
+     * @param socket
+     * @return
+     */
+    public static boolean isSocketConnected(Socket socket) {
+        return socket != null && socket.isConnected() && !socket.isClosed();
+    }
+}

@@ -4,7 +4,8 @@
 
 package com.mrhuo.gobang.ui;
 
-import com.mrhuo.gobang.bean.CONSTANT;
+import com.mrhuo.gobang.common.CONSTANT;
+import com.mrhuo.gobang.bean.ChessColor;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -29,10 +30,31 @@ public class GameInfo extends JPanel {
         this.add(this.gameStatus, BorderLayout.EAST);
     }
 
+    /**
+     * 更新用户棋子的图片
+     * @param chessColor
+     */
+    public void updateUserChess(ChessColor chessColor){
+        if (chessColor != null) {
+            ImageIcon imageIcon = CONSTANT.getImageIcon(chessColor.getChessColorName());
+            this.userInfo.setIcon(imageIcon);
+        } else {
+            this.userInfo.setIcon(null);
+        }
+    }
+
+    /**
+     * 更新用户登录状态
+     * @param userInfo
+     */
     public void updateUserInfo(String userInfo) {
         this.userInfo.setText(userInfo);
     }
 
+    /**
+     * 更新游戏状态
+     * @param gameStatus
+     */
     public void updateGameStatus(String gameStatus) {
         this.gameStatus.setText(gameStatus);
     }
